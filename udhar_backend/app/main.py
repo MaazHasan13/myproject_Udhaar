@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.models.udhaar import Udhaar
+from app.routers import auth, customers, udhaars
+from app.models.payment import Payment
+from app.routers import auth, customers, udhaars, payments
 
 from app.database import (
     Base,
@@ -24,6 +28,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+app.include_router(
+    payments.router,
+    prefix="/payments",
+    tags=["Payments"]
 )
 
 Base.metadata.create_all(bind=engine)
@@ -58,3 +67,9 @@ def home():
     return {
         "message": "Udhar Backend Running"
     }
+
+app.include_router(
+    udhaars.router,
+    prefix="/udhaars",
+    tags=["Udhaars"]
+)
