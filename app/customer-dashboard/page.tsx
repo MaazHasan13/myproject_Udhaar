@@ -7,6 +7,7 @@ export default function CustomerDashboardPage() {
   const router = useRouter();
 
   const [customer, setCustomer] = useState<any>(null);
+  const [amount, setAmount] = useState("");
 
   useEffect(() => {
     const customerId =
@@ -35,7 +36,55 @@ export default function CustomerDashboardPage() {
       console.error(error);
     }
   };
+const makePayment = async () => {
 
+  if (Number(amount) <= 0) {
+    alert("Enter valid amount");
+    return;
+  }
+
+  if (
+    Number(amount) >
+    customer.remaining_balance
+  ) {
+    alert(
+      "Amount exceeds remaining balance"
+    );
+    return;
+  }
+
+  try {
+    const customerId =
+      localStorage.getItem("customer_id");
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/payments/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          customer_id: Number(customerId),
+          amount: Number(amount),
+        }),
+      }
+    );
+
+    if (response.ok) {
+      alert("Payment Added");
+
+      setAmount("");
+
+      fetchCustomerData(
+        customerId as string
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
   const logout = () => {
     localStorage.removeItem("customer_id");
     localStorage.removeItem("customer_name");
@@ -84,6 +133,31 @@ export default function CustomerDashboardPage() {
           </p>
         </div>
       </div>
+      <div className="border p-4 rounded mb-8">
+  <h2 className="text-xl font-bold mb-3">
+    Make Payment
+  </h2>
+
+  <input
+    type="number"
+    placeholder="Enter Amount"
+    value={amount}
+    onChange={(e) =>
+      setAmount(e.target.value)
+    }
+    className="border p-2 mr-3"
+  />
+
+  <button
+  disabled={
+    customer.remaining_balance <= 0
+  }
+  onClick={makePayment}
+  className="border px-4 py-2 rounded"
+>
+  Pay
+</button>
+</div>
 
       <h2 className="text-2xl font-bold mb-3">
         Udhaar History
