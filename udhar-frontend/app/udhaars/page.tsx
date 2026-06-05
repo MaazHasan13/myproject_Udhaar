@@ -16,21 +16,55 @@ interface Udhaar {
   date: string;
 }
 
+
 export default function UdhaarsPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
 
   const [customerId, setCustomerId] = useState("");
-  const [amount, setAmount] = useState("");
+  // const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [udhaars, setUdhaars] = useState<Udhaar[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   
 
-  useEffect(() => {
+//   useEffect(() => {
+//   fetchCustomers();
+//   fetchUdhaars();
+// }, []);
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+const [products, setProducts] = useState<Product[]>([]);
+const [selectedProductId, setSelectedProductId] = useState("");
+const [quantity, setQuantity] = useState("1");
+
+useEffect(() => {
   fetchCustomers();
   fetchUdhaars();
+  fetchProducts();
 }, []);
+const fetchProducts = async () => {
+  const response = await fetch(
+    "http://127.0.0.1:8000/products/"
+  );
+
+  const data = await response.json();
+
+  setProducts(data);
+};
+const selectedProduct = products.find(
+  (p) => p.id === Number(selectedProductId)
+);
+
+const calculatedAmount =
+  selectedProduct
+    ? selectedProduct.price * Number(quantity)
+    : 0;
 
   const fetchCustomers = async () => {
     try {
@@ -78,7 +112,7 @@ const deleteUdhaar = async (id: number) => {
 const editUdhaar = (udhaar: Udhaar) => {
   setEditingId(udhaar.id);
   setCustomerId(udhaar.customer_id.toString());
-  setAmount(udhaar.amount.toString());
+  // setAmount(udhaar.amount.toString());
   setDescription(udhaar.description);
   setDate(udhaar.date);
 };
@@ -93,8 +127,9 @@ const updateUdhaar = async () => {
         },
         body: JSON.stringify({
           customer_id: Number(customerId),
-          amount: Number(amount),
-          description,
+          amount: calculatedAmount,
+          description:
+  selectedProduct?.name || "",
           date,
         }),
       }
@@ -103,11 +138,11 @@ const updateUdhaar = async () => {
     if (response.ok) {
       alert("Udhaar Updated");
 
-      setEditingId(null);
       setCustomerId("");
-      setAmount("");
-      setDescription("");
-      setDate("");
+setSelectedProductId("");
+setQuantity("1");
+setDescription("");
+setDate("");
 
       fetchUdhaars();
     }
@@ -126,21 +161,21 @@ const addUdhaar = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          customer_id: Number(customerId),
-          amount: Number(amount),
-          description,
-          date,
-        }),
+  customer_id: Number(customerId),
+  amount: calculatedAmount,
+  description: selectedProduct?.name || "",
+  date,
+}),
       }
     );
 
     if (response.ok) {
       alert("Udhaar Added");
-
-      setCustomerId("");
-      setAmount("");
-      setDescription("");
-      setDate("");
+setCustomerId("");
+setSelectedProductId("");
+setQuantity("1");
+setDescription("");
+setDate("");
 
       fetchUdhaars();
     }
@@ -196,17 +231,39 @@ const addUdhaar = async () => {
             ))}
           </select>
 
-          <input
-            type="number"
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) =>
-              setAmount(e.target.value)
-            }
-            className="border border-gray-300 rounded-xl p-3"
-          />
+          <select
+  value={selectedProductId}
+  onChange={(e) =>
+    setSelectedProductId(e.target.value)
+  }
+  className="border border-gray-300 rounded-xl p-3"
+>
+  <option value="">
+    Select Product
+  </option>
 
-          <input
+  {products.map((product) => (
+    <option
+      key={product.id}
+      value={product.id}
+    >
+      {product.name} - ₹{product.price}
+    </option>
+  ))}
+</select>
+
+<input
+  type="number"
+  min="1"
+  value={quantity}
+  onChange={(e) =>
+    setQuantity(e.target.value)
+  }
+  placeholder="Qty"
+  className="border border-gray-300 rounded-xl p-3"
+/>
+
+          {/* <input
             type="text"
             placeholder="Description"
             value={description}
@@ -214,7 +271,11 @@ const addUdhaar = async () => {
               setDescription(e.target.value)
             }
             className="border border-gray-300 rounded-xl p-3"
-          />
+          /> */}
+
+<div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl font-bold">
+  Total: ₹{calculatedAmount}
+</div>
 
           <input
             type="date"

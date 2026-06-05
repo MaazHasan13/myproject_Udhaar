@@ -46,6 +46,17 @@ export default function Sidebar() {
           <FaHome />
           Dashboard
         </Link>
+        <Link
+  href="/products"
+  className="
+    flex items-center gap-3
+    p-3 rounded-xl
+    hover:bg-slate-800
+    transition
+  "
+>
+  📦 Products
+</Link>
 
         <Link
           href="/customers"
