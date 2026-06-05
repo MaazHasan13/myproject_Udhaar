@@ -5,6 +5,13 @@ from app.routers import auth, customers, udhaars
 from app.models.payment import Payment
 from app.routers import auth, customers, udhaars, payments
 
+from app.routers import (
+    auth,
+    customers,
+    udhaars,
+    payments,
+    products
+)
 from app.database import (
     Base,
     engine,
@@ -15,7 +22,7 @@ from app.seed import create_default_admin
 
 from app.models.user import User
 from app.models.customer import Customer
-
+from app.models.udhaar_item import UdhaarItem
 from app.routers import auth, customers
 
 app = FastAPI(
@@ -72,4 +79,9 @@ app.include_router(
     udhaars.router,
     prefix="/udhaars",
     tags=["Udhaars"]
+)
+app.include_router(
+    products.router,
+    prefix="/products",
+    tags=["Products"]
 )

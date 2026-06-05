@@ -50,3 +50,8 @@ class Udhaar(Base):
         "Customer",
         back_populates="udhaars"
     )
+    items = relationship(
+    "UdhaarItem",
+    back_populates="udhaar",
+    cascade="all, delete"
+    )
